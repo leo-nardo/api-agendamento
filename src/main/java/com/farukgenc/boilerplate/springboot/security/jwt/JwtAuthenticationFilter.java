@@ -20,11 +20,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Objects;
 
-/**
- * Created on Ağustos, 2020
- *
- * @author Faruk
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -48,8 +43,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 			try {
 				username = jwtTokenManager.getUsernameFromToken(authToken);
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				log.error("Authentication Exception : {}", e.getMessage());
 				chain.doFilter(request, response);
 				return;
@@ -58,7 +52,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 		final SecurityContext securityContext = SecurityContextHolder.getContext();
 
-		final boolean canBeStartTokenValidation = Objects.nonNull(username) && Objects.isNull(securityContext.getAuthentication());
+		final boolean canBeStartTokenValidation = Objects.nonNull(username)
+				&& Objects.isNull(securityContext.getAuthentication());
 
 		if (!canBeStartTokenValidation) {
 			chain.doFilter(request, response);
@@ -73,12 +68,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			return;
 		}
 
-		final UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+		// Extract Company ID and set context
+		try {
+			String companyIdStr = com.auth0.jwt.JWT.decode(authToken).getClaim("companyId").asString();
+			if (companyIdStr != null) {
+				com.farukgenc.boilerplate.springboot.security.TenantContext
+						.setTenantId(java.util.UUID.fromString(companyIdStr));
+			}
+		} catch (Exception e) {
+			log.warn("Could not extract companyId from token: {}", e.getMessage());
+		}
+
+		final UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user, null,
+				user.getAuthorities());
 		authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 		securityContext.setAuthentication(authentication);
 
 		log.info("Authentication successful. Logged in username : {} ", username);
 
-		chain.doFilter(request, response);
+		try {
+			chain.doFilter(request, response);
+		} finally {
+			com.farukgenc.boilerplate.springboot.security.TenantContext.clear();
+		}
 	}
 }

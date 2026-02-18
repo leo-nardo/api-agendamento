@@ -14,11 +14,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-/**
- * Created on Ağustos, 2020
- *
- * @author Faruk
- */
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfiguration {
@@ -28,12 +23,13 @@ public class SecurityConfiguration {
 	private final JwtAuthenticationEntryPoint unauthorizedHandler;
 
 	@Bean
-	public AuthenticationManager authenticationManager(final AuthenticationConfiguration authenticationConfiguration) {
+	public AuthenticationManager authenticationManager(final AuthenticationConfiguration authenticationConfiguration)
+			throws Exception {
 		return authenticationConfiguration.getAuthenticationManager();
 	}
 
 	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http) {
+	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
 		//@formatter:off
 

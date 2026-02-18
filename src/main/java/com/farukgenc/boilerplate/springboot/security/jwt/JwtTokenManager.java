@@ -4,34 +4,30 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.farukgenc.boilerplate.springboot.model.User;
+import com.farukgenc.boilerplate.springboot.model.UserAccount;
 import com.farukgenc.boilerplate.springboot.model.UserRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.Objects;
 
-/**
- * Created on Ağustos, 2020
- *
- * @author Faruk
- */
 @Component
 @RequiredArgsConstructor
 public class JwtTokenManager {
 
 	private final JwtProperties jwtProperties;
 
-	public String generateToken(User user) {
+	public String generateToken(UserAccount userAccount, java.util.UUID companyId, UserRole userRole) {
 
-		final String username = user.getUsername();
-		final UserRole userRole = user.getUserRole();
+		final String username = userAccount.getEmail();
 
 		//@formatter:off
 		return JWT.create()
 				.withSubject(username)
 				.withIssuer(jwtProperties.getIssuer())
 				.withClaim("role", userRole.name())
+                .withClaim("companyId", Objects.nonNull(companyId) ? companyId.toString() : null)
 				.withIssuedAt(new Date())
 				.withExpiresAt(new Date(System.currentTimeMillis() + jwtProperties.getExpirationMinute() * 60 * 1000))
 				.sign(Algorithm.HMAC256(jwtProperties.getSecretKey().getBytes()));

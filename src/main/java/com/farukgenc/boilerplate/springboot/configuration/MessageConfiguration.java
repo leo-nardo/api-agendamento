@@ -7,11 +7,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
-/**
- * Created on Ağustos, 2020
- *
- * @author Faruk
- */
 @Configuration
 public class MessageConfiguration {
 

@@ -1,7 +1,7 @@
 package com.farukgenc.boilerplate.springboot.security.service;
 
-import com.farukgenc.boilerplate.springboot.model.UserRole;
-import com.farukgenc.boilerplate.springboot.security.dto.AuthenticatedUserDto;
+import com.farukgenc.boilerplate.springboot.model.UserAccount;
+import com.farukgenc.boilerplate.springboot.repository.UserAccountRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -12,12 +12,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
-import java.util.Objects;
 
 /**
- * Created on Ağustos, 2020
- *
- * @author Faruk
+ * Refactored for Multi-tenancy
  */
 @Slf4j
 @Service
@@ -26,22 +23,22 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
 	private static final String USERNAME_OR_PASSWORD_INVALID = "Invalid username or password.";
 
-	private final UserService userService;
+	private final UserAccountRepository userAccountRepository;
 
 	@Override
-	public UserDetails loadUserByUsername(String username) {
+	public UserDetails loadUserByUsername(String email) {
 
-		final AuthenticatedUserDto authenticatedUser = userService.findAuthenticatedUserByUsername(username);
+		final UserAccount userAccount = userAccountRepository.findByEmail(email)
+				.orElseThrow(() -> new UsernameNotFoundException(USERNAME_OR_PASSWORD_INVALID));
 
-		if (Objects.isNull(authenticatedUser)) {
-			throw new UsernameNotFoundException(USERNAME_OR_PASSWORD_INVALID);
-		}
+		// For initial login, we grant a generic USER role or empty.
+		// Specific Company Roles are checked when generating the JWT with a selected
+		// Company context.
+		// Or we could load ALL roles here, but for now keeping it simple: identity
+		// verification first.
+		// Note: The original returned "AuthenticatedUserDto", but here we return Spring
+		// Security User directly.
 
-		final String authenticatedUsername = authenticatedUser.getUsername();
-		final String authenticatedPassword = authenticatedUser.getPassword();
-		final UserRole userRole = authenticatedUser.getUserRole();
-		final SimpleGrantedAuthority grantedAuthority = new SimpleGrantedAuthority(userRole.name());
-
-		return new User(authenticatedUsername, authenticatedPassword, Collections.singletonList(grantedAuthority));
+		return new User(userAccount.getEmail(), userAccount.getPassword(), Collections.emptyList());
 	}
 }

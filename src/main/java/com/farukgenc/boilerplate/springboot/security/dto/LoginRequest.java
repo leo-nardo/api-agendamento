@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-
 /**
  * Created on Ağustos, 2020
  *
@@ -22,4 +21,5 @@ public class LoginRequest {
 	@NotEmpty(message = "{login_password_not_empty}")
 	private String password;
 
+	private java.util.UUID companyId;
 }
