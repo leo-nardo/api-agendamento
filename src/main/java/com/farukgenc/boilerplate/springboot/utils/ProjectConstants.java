@@ -2,11 +2,6 @@ package com.farukgenc.boilerplate.springboot.utils;
 
 import java.util.Locale;
 
-/**
- * Created on Ağustos, 2020
- *
- * @author Faruk
- */
 public final class ProjectConstants {
 
 	public static final String DEFAULT_ENCODING = "UTF-8";

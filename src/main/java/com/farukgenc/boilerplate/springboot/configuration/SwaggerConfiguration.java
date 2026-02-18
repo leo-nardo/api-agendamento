@@ -45,7 +45,16 @@ public class SwaggerConfiguration {
 		final Components components = new Components();
 
 		final String schemeName = "bearerAuth";
-		components.addSecuritySchemes(schemeName, new SecurityScheme().name(schemeName).type(HTTP).scheme("Bearer").bearerFormat("JWT"));
+		components.addSecuritySchemes(schemeName,
+				new SecurityScheme().name(schemeName).type(HTTP).scheme("Bearer").bearerFormat("JWT"));
+		// Add global header for companyId
+		components.addParameters("companyId", new io.swagger.v3.oas.models.parameters.Parameter()
+				.in("header")
+				.name("X-Company-Id")
+				.description("Company ID (UUID) for tenant context")
+				.required(false) // Optional because not all endpoints might need it explicitly if token has it,
+									// but good for debugging
+				.schema(new io.swagger.v3.oas.models.media.StringSchema()));
 
 		final OpenAPI openAPI = new OpenAPI();
 		openAPI.setInfo(apiInformation);

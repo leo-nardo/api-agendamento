@@ -86,6 +86,6 @@ public class UserServiceImpl implements UserService {
 
 		log.info("{} registered successfully as Owner of {}!", email, company.getLegalName());
 
-		return new RegistrationResponse(registrationSuccessMessage);
+		return new RegistrationResponse(registrationSuccessMessage, company.getId());
 	}
 }

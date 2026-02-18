@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "appointment")
+@EntityListeners(com.farukgenc.boilerplate.springboot.audit.AuditEntityListener.class)
 public class Appointment extends BaseTenantEntity {
 
     @Id

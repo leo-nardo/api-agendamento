@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "business_service")
+@EntityListeners(com.farukgenc.boilerplate.springboot.audit.AuditEntityListener.class)
 public class BusinessService extends BaseTenantEntity {
 
     @Id

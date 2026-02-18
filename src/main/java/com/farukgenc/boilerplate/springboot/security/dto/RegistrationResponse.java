@@ -18,4 +18,6 @@ public class RegistrationResponse {
 
 	private String message;
 
+	private java.util.UUID companyId;
+
 }

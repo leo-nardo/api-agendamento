@@ -11,6 +11,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "professional")
+@EntityListeners(com.farukgenc.boilerplate.springboot.audit.AuditEntityListener.class)
 public class Professional extends BaseTenantEntity {
 
     @Id
