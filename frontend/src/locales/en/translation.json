@@ -1,0 +1,12 @@
+{
+    "welcome": "Welcome to Scheduling",
+    "login": "Login",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "dashboard": "Dashboard",
+    "services": "Services",
+    "professionals": "Professionals",
+    "customers": "Customers",
+    "appointments": "Appointments"
+}
