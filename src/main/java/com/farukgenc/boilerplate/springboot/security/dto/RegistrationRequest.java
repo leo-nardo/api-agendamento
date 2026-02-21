@@ -29,4 +29,7 @@ public class RegistrationRequest {
 	@NotEmpty(message = "{password_not_empty}")
 	private String password;
 
+	@NotEmpty(message = "{phone_number_not_empty}")
+	private String phoneNumber;
+
 }

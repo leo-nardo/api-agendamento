@@ -59,4 +59,34 @@ public class AvailabilityService {
     private boolean isOverlapping(LocalDateTime start1, LocalDateTime end1, LocalDateTime start2, LocalDateTime end2) {
         return start1.isBefore(end2) && start2.isBefore(end1);
     }
+
+    /**
+     * Generates available time slots for a professional on a specific date.
+     * Assumes working hours 09:00 - 18:00.
+     */
+    public List<String> getAvailableSlots(UUID professionalId, java.time.LocalDate date, int durationMinutes) {
+        List<String> availableSlots = new java.util.ArrayList<>();
+
+        // Define working hours (should be configurable per professional/company)
+        LocalDateTime startOfDay = date.atTime(9, 0);
+        LocalDateTime endOfDay = date.atTime(18, 0);
+
+        LocalDateTime currentSlot = startOfDay;
+
+        while (currentSlot.plusMinutes(durationMinutes).isBefore(endOfDay)
+                || currentSlot.plusMinutes(durationMinutes).isEqual(endOfDay)) {
+            LocalDateTime slotEnd = currentSlot.plusMinutes(durationMinutes);
+
+            if (isAvailable(professionalId, currentSlot, slotEnd)) {
+                availableSlots.add(currentSlot.toLocalTime().toString());
+            }
+
+            currentSlot = currentSlot.plusMinutes(durationMinutes);
+            // Or slot increment could be smaller than duration (e.g. 15 mins start times
+            // for 30 min service)
+            // For now, simple non-overlapping grid
+        }
+
+        return availableSlots;
+    }
 }

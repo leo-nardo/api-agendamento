@@ -7,4 +7,6 @@ import java.util.UUID;
 
 public interface CompanyRepository extends JpaRepository<Company, UUID> {
     boolean existsByTaxId(String taxId);
+
+    java.util.Optional<Company> findBySlug(String slug);
 }

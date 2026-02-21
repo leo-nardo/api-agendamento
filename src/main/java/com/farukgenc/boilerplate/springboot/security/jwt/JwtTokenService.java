@@ -22,6 +22,7 @@ public class JwtTokenService {
 
 	private final UserAccountRepository userAccountRepository;
 	private final CompanyUserRepository companyUserRepository;
+	private final com.farukgenc.boilerplate.springboot.repository.CompanyRepository companyRepository;
 	private final JwtTokenManager jwtTokenManager;
 	private final AuthenticationManager authenticationManager;
 
@@ -43,25 +44,34 @@ public class JwtTokenService {
 		java.util.UUID companyId = loginRequest.getCompanyId();
 		UserRole role = UserRole.PROFESSIONAL; // Default fallback if no company context, or handle differently
 
+		String slug = null;
+		String companyName = null;
 		if (Objects.nonNull(companyId)) {
 			// Verify user belongs to company
 			CompanyUser companyUser = companyUserRepository.findByUserIdAndCompanyId(userAccount.getId(), companyId)
 					.orElseThrow(() -> new RuntimeException("User does not belong to the specified company"));
 			role = companyUser.getRole();
+			var companyOpt = companyRepository.findById(companyId);
+			if (companyOpt.isPresent()) {
+				slug = companyOpt.get().getSlug();
+				companyName = companyOpt.get().getTradeName() != null ? companyOpt.get().getTradeName()
+						: companyOpt.get().getLegalName();
+			}
 		} else {
-			// If no company selected, we could return a global token or pick the first
-			// company
-			// For now, let's pick the first one found or fail if none
 			// MVP: Try to find any company
 			var companies = companyUserRepository.findByUserId(userAccount.getId());
 			if (!companies.isEmpty()) {
 				CompanyUser first = companies.get(0);
 				companyId = first.getCompanyId();
 				role = first.getRole();
+				var companyOpt = companyRepository.findById(companyId);
+				if (companyOpt.isPresent()) {
+					slug = companyOpt.get().getSlug();
+					companyName = companyOpt.get().getTradeName() != null ? companyOpt.get().getTradeName()
+							: companyOpt.get().getLegalName();
+				}
 			} else {
 				// User has no companies. Maybe a platform admin or just registered?
-				// Allow login but strictly with no data access?
-				// We'll pass companyId=null and role=null or handle in TokenManager
 				companyId = null;
 				role = UserRole.ADMIN; // Placeholder or specific NO_ACCESS role
 			}
@@ -71,6 +81,6 @@ public class JwtTokenService {
 
 		log.info("{} has successfully logged in!", userAccount.getEmail());
 
-		return new LoginResponse(token);
+		return new LoginResponse(token, companyId, role.name(), slug, companyName);
 	}
 }

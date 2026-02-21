@@ -48,9 +48,15 @@ public class UserServiceImpl implements UserService {
 
 		userValidationService.validateUser(registrationRequest);
 
+		String baseSlug = registrationRequest.getCompanyName().toLowerCase().replaceAll("[^a-z0-9]", "-")
+				.replaceAll("-+", "-").replaceAll("-$", "").replaceAll("^-", "");
+		String finalSlug = baseSlug.isEmpty() ? "company-" + java.util.UUID.randomUUID().toString().substring(0, 8)
+				: baseSlug;
+
 		Company company = Company.builder()
 				.legalName(registrationRequest.getCompanyName())
 				.taxId(registrationRequest.getTaxId())
+				.slug(finalSlug)
 				.active(true)
 				.build();
 		company = companyRepository.save(company);
@@ -59,6 +65,7 @@ public class UserServiceImpl implements UserService {
 				.email(registrationRequest.getEmail())
 				.password(bCryptPasswordEncoder.encode(registrationRequest.getPassword()))
 				.fullName(registrationRequest.getFullName())
+				.phoneNumber(registrationRequest.getPhoneNumber())
 				.active(true)
 				.build();
 

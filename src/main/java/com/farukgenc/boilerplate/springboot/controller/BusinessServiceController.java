@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/services")
+@RequestMapping("/api/services")
 @RequiredArgsConstructor
 public class BusinessServiceController {
 
@@ -18,7 +18,8 @@ public class BusinessServiceController {
 
     @GetMapping
     public ResponseEntity<List<BusinessService>> getAllServices() {
-        return ResponseEntity.ok(businessServiceService.findAll());
+        java.util.UUID companyId = com.farukgenc.boilerplate.springboot.security.TenantContext.getTenantId();
+        return ResponseEntity.ok(businessServiceService.findAllByCompanyId(companyId));
     }
 
     @GetMapping("/{id}")
@@ -28,6 +29,7 @@ public class BusinessServiceController {
 
     @PostMapping
     public ResponseEntity<BusinessService> createService(@RequestBody BusinessService businessService) {
+        businessService.setCompanyId(com.farukgenc.boilerplate.springboot.security.TenantContext.getTenantId());
         return ResponseEntity.ok(businessServiceService.create(businessService));
     }
 

@@ -6,6 +6,9 @@ import org.springframework.stereotype.Repository;
 
 import java.util.UUID;
 
+import java.util.List;
+
 @Repository
 public interface BusinessServiceRepository extends JpaRepository<BusinessService, UUID> {
+    List<BusinessService> findByCompanyId(UUID companyId);
 }

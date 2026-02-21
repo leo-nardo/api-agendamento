@@ -27,6 +27,9 @@ public class Company {
     @Column(name = "tax_id")
     private String taxId;
 
+    @Column(name = "slug", unique = true)
+    private String slug;
+
     @Column(name = "settings_json", columnDefinition = "TEXT")
     private String settingsJson;
 

@@ -18,6 +18,10 @@ public class BusinessServiceService {
         return businessServiceRepository.findAll();
     }
 
+    public List<BusinessService> findAllByCompanyId(UUID companyId) {
+        return businessServiceRepository.findByCompanyId(companyId);
+    }
+
     public BusinessService findById(UUID id) {
         return businessServiceRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Service not found"));

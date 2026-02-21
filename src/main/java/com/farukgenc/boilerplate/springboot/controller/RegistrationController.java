@@ -10,22 +10,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-
-/**
- * Created on Ağustos, 2020
- *
- * @author Faruk
- */
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/register")
+@RequestMapping("/api/register")
 public class RegistrationController {
 
 	private final UserService userService;
 
 	@PostMapping
 	@Operation(tags = "Register Service", description = "You can register to the system by sending information in the appropriate format.")
-	public ResponseEntity<RegistrationResponse> registrationRequest(@Valid @RequestBody RegistrationRequest registrationRequest) {
+	public ResponseEntity<RegistrationResponse> registrationRequest(
+			@Valid @RequestBody RegistrationRequest registrationRequest) {
 
 		final RegistrationResponse registrationResponse = userService.registration(registrationRequest);
 

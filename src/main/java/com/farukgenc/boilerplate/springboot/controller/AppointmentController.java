@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/appointments")
+@RequestMapping("/api/appointments")
 @RequiredArgsConstructor
 public class AppointmentController {
 
@@ -25,7 +25,9 @@ public class AppointmentController {
 
     @PostMapping
     public ResponseEntity<Appointment> createAppointment(@RequestBody CreateAppointmentRequest request) {
+        java.util.UUID companyId = com.farukgenc.boilerplate.springboot.security.TenantContext.getTenantId();
         Appointment appointment = appointmentService.createAppointment(
+                companyId,
                 request.getProfessionalId(),
                 request.getBusinessServiceId(),
                 request.getCustomerId(),

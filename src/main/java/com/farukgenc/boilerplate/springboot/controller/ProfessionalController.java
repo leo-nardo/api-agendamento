@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/professionals")
+@RequestMapping("/api/professionals")
 @RequiredArgsConstructor
 public class ProfessionalController {
 
@@ -18,11 +18,20 @@ public class ProfessionalController {
 
     @GetMapping
     public ResponseEntity<List<Professional>> getAllProfessionals() {
-        return ResponseEntity.ok(professionalService.findAll());
+        java.util.UUID companyId = com.farukgenc.boilerplate.springboot.security.TenantContext.getTenantId();
+        return ResponseEntity.ok(professionalService.findAllByCompanyId(companyId));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Professional> getProfessionalById(@PathVariable UUID id) {
         return ResponseEntity.ok(professionalService.findById(id));
+    }
+
+    @PostMapping
+    public ResponseEntity<Professional> createProfessional(
+            @RequestBody com.farukgenc.boilerplate.springboot.security.dto.CreateProfessionalRequest request) {
+        java.util.UUID companyId = com.farukgenc.boilerplate.springboot.security.TenantContext.getTenantId();
+        Professional created = professionalService.create(request, companyId);
+        return ResponseEntity.ok(created);
     }
 }

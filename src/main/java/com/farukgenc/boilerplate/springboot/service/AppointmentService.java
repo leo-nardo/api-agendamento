@@ -30,16 +30,24 @@ public class AppointmentService {
     }
 
     @Transactional
-    public Appointment createAppointment(UUID professionalId, UUID businessServiceId, UUID customerId,
+    public Appointment createAppointment(UUID companyId, UUID professionalId, UUID businessServiceId, UUID customerId,
             java.time.LocalDateTime startTime, java.time.LocalDateTime endTime) {
 
         // 1. Validate Professional
         Professional professional = professionalRepository.findById(professionalId)
                 .orElseThrow(() -> new RuntimeException("Professional not found"));
 
+        if (!professional.getCompanyId().equals(companyId)) {
+            throw new RuntimeException("Professional does not belong to this company");
+        }
+
         // 2. Validate Service
         BusinessService service = businessServiceRepository.findById(businessServiceId)
                 .orElseThrow(() -> new RuntimeException("Service not found"));
+
+        if (!service.getCompanyId().equals(companyId)) {
+            throw new RuntimeException("Service does not belong to this company");
+        }
 
         // 3. Check Availability
         if (!availabilityService.isAvailable(professionalId, startTime, endTime)) {
@@ -47,6 +55,7 @@ public class AppointmentService {
         }
 
         Appointment.AppointmentBuilder<?, ?> builder = Appointment.builder()
+                .companyId(companyId)
                 .professional(professional)
                 .service(service)
                 .startTime(startTime)
@@ -61,6 +70,60 @@ public class AppointmentService {
         }
 
         Appointment appointment = builder.build();
+        return appointmentRepository.save(appointment);
+    }
+
+    @Transactional
+    public Appointment createGuestAppointment(
+            java.util.UUID companyId,
+            com.farukgenc.boilerplate.springboot.security.dto.GuestBookingRequest request) {
+
+        // 1. Validate Professional
+        Professional professional = professionalRepository.findById(request.getProfessionalId())
+                .orElseThrow(() -> new RuntimeException("Professional not found"));
+        if (!professional.getCompanyId().equals(companyId)) {
+            throw new RuntimeException("Professional does not belong to this company");
+        }
+
+        // 2. Validate Service
+        BusinessService service = businessServiceRepository.findById(request.getServiceId())
+                .orElseThrow(() -> new RuntimeException("Service not found"));
+        if (!service.getCompanyId().equals(companyId)) {
+            throw new RuntimeException("Service does not belong to this company");
+        }
+
+        // 3. Calculator End Time and Check Availability
+        java.time.LocalDateTime startTime = request.getAppointmentTime();
+        java.time.LocalDateTime endTime = startTime.plusMinutes(service.getDurationMinutes());
+
+        if (!availabilityService.isAvailable(request.getProfessionalId(), startTime, endTime)) {
+            throw new RuntimeException("Professional is not available for the selected time.");
+        }
+
+        // 4. Handle Customer (Guest logic)
+        com.farukgenc.boilerplate.springboot.model.Customer customer = customerRepository
+                .findByEmailAndCompanyId(request.getCustomerEmail(), companyId)
+                .orElseGet(() -> {
+                    com.farukgenc.boilerplate.springboot.model.Customer newCust = com.farukgenc.boilerplate.springboot.model.Customer
+                            .builder()
+                            .companyId(companyId)
+                            .fullName(request.getCustomerName())
+                            .email(request.getCustomerEmail())
+                            .phoneNumber(request.getCustomerPhone())
+                            .build();
+                    return customerRepository.save(newCust);
+                });
+
+        Appointment appointment = Appointment.builder()
+                .companyId(companyId)
+                .professional(professional)
+                .service(service)
+                .customer(customer)
+                .startTime(startTime)
+                .endTime(endTime)
+                .status(AppointmentStatus.SCHEDULED)
+                .build();
+
         return appointmentRepository.save(appointment);
     }
 
