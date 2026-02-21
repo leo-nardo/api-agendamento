@@ -1,4 +1,7 @@
 databaseChangeLog:
   - include:
-      file: db/changelog/changes/V1__init_structure.sql
+      file: changes/V1__init_structure.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changes/V2__add_company_slug.sql
       relativeToChangelogFile: true
