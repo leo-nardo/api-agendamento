@@ -1,6 +1,14 @@
-FROM eclipse-temurin:21-jdk-jammy
+# Stage 1: Build the application
+FROM maven:3.9.6-eclipse-temurin-21 AS build
 WORKDIR /app
-ARG JAR_FILE=target/*.jar
-COPY ${JAR_FILE} spring-boot-boilerplate.jar
+COPY pom.xml .
+COPY src ./src
+RUN mvn clean package -DskipTests
+
+# Stage 2: Run the application
+FROM eclipse-temurin:21-jre-jammy
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
-ENTRYPOINT ["java","-jar","spring-boot-boilerplate.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
