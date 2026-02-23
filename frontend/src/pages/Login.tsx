@@ -2,14 +2,14 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/api/axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 const loginSchema = z.object({
     email: z.string().email({ message: "Email inválido" }),
@@ -37,14 +37,14 @@ export default function Login() {
             });
 
             // Backend now returns companyId, role, slug, and companyName in response
-            const { token, companyId, slug, companyName } = res.data;
+            const { token, companyId, role, slug, companyName } = res.data;
 
-            if (!companyId) {
+            if (!companyId && role !== 'ADMIN') {
                 setError("Sua conta não tem uma empresa vinculada. Contate o suporte.");
                 return;
             }
 
-            login(token, companyId, slug, companyName);
+            login(token, companyId || null, slug, companyName);
             navigate('/admin');
         } catch (err: any) {
             console.error(err);
@@ -83,11 +83,6 @@ export default function Login() {
                         </Button>
                     </form>
                 </CardContent>
-                <CardFooter className="justify-center">
-                    <Link to="/admin/register" className="text-sm text-blue-600 hover:underline">
-                        Não tem uma conta? Registre-se
-                    </Link>
-                </CardFooter>
             </Card>
         </div>
     );

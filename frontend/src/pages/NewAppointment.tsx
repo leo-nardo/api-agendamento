@@ -19,12 +19,12 @@ interface Service {
 
 interface Professional {
     id: string;
-    name: string;
+    fullName: string;
 }
 
 interface Customer {
     id: string;
-    name: string;
+    fullName: string;
 }
 
 export default function NewAppointment() {
@@ -119,7 +119,7 @@ export default function NewAppointment() {
                                 className={`p-4 border rounded cursor-pointer hover:bg-gray-50 ${selectedProfessional?.id === prof.id ? 'border-primary ring-1 ring-primary' : ''}`}
                                 onClick={() => setSelectedProfessional(prof)}
                             >
-                                <span className="font-medium">{prof.name}</span>
+                                <span className="font-medium">{prof.fullName}</span>
                             </div>
                         ))}
                     </div>
@@ -133,7 +133,7 @@ export default function NewAppointment() {
                                 className={`p-4 border rounded cursor-pointer hover:bg-gray-50 ${selectedCustomer?.id === cust.id ? 'border-primary ring-1 ring-primary' : ''}`}
                                 onClick={() => setSelectedCustomer(cust)}
                             >
-                                <span className="font-medium">{cust.name}</span>
+                                <span className="font-medium">{cust.fullName}</span>
                             </div>
                         ))}
                     </div>
@@ -174,8 +174,8 @@ export default function NewAppointment() {
                     <div className="space-y-4">
                         <div className="p-4 bg-gray-50 rounded space-y-2">
                             <p><strong>Service:</strong> {selectedService?.name}</p>
-                            <p><strong>Professional:</strong> {selectedProfessional?.name}</p>
-                            <p><strong>Customer:</strong> {selectedCustomer?.name}</p>
+                            <p><strong>Professional:</strong> {selectedProfessional?.fullName}</p>
+                            <p><strong>Customer:</strong> {selectedCustomer?.fullName}</p>
                             <p><strong>Date:</strong> {selectedDate && format(selectedDate, 'PPP')}</p>
                             <p><strong>Time:</strong> {selectedTime}</p>
                         </div>

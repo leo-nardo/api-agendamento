@@ -10,11 +10,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface Professional {
     id: string;
-    userAccount: {
-        fullName: string;
-        email: string;
-        phoneNumber: string;
-    };
+    fullName: string;
+    email: string;
+    phoneNumber: string;
     active: boolean;
 }
 
@@ -122,15 +120,15 @@ export default function Professionals() {
                     <Card key={prof.id}>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-base font-semibold">
-                                {prof.userAccount?.fullName || 'Sem Nome'}
+                                {prof.fullName || 'Sem Nome'}
                             </CardTitle>
                             <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-700 hover:bg-red-50" onClick={() => deleteMutation.mutate(prof.id)}>
                                 <Trash2 className="h-4 w-4" />
                             </Button>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-sm text-gray-500">{prof.userAccount?.email}</p>
-                            <p className="text-sm text-gray-500">{prof.userAccount?.phoneNumber}</p>
+                            <p className="text-sm text-gray-500">{prof.email}</p>
+                            <p className="text-sm text-gray-500">{prof.phoneNumber}</p>
                         </CardContent>
                     </Card>
                 ))}

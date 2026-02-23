@@ -10,9 +10,10 @@ import java.util.UUID;
 
 import com.farukgenc.boilerplate.springboot.model.CompanyUser;
 import com.farukgenc.boilerplate.springboot.model.UserAccount;
-import com.farukgenc.boilerplate.springboot.model.UserRole;
+import com.farukgenc.boilerplate.springboot.model.Role;
 import com.farukgenc.boilerplate.springboot.repository.CompanyUserRepository;
 import com.farukgenc.boilerplate.springboot.repository.UserAccountRepository;
+import com.farukgenc.boilerplate.springboot.repository.RoleRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +24,7 @@ public class ProfessionalService {
         private final ProfessionalRepository professionalRepository;
         private final UserAccountRepository userAccountRepository;
         private final CompanyUserRepository companyUserRepository;
+        private final RoleRepository roleRepository;
         private final BCryptPasswordEncoder passwordEncoder;
 
         public List<Professional> findAll() {
@@ -35,6 +37,13 @@ public class ProfessionalService {
 
         public Professional findById(UUID id) {
                 return professionalRepository.findById(id)
+                                .orElseThrow(() -> new RuntimeException("Professional not found"));
+        }
+
+        public Professional findByEmailAndCompanyId(String email, UUID companyId) {
+                UserAccount user = userAccountRepository.findByEmail(email)
+                                .orElseThrow(() -> new RuntimeException("User not found"));
+                return professionalRepository.findByUserAccountIdAndCompanyId(user.getId(), companyId)
                                 .orElseThrow(() -> new RuntimeException("Professional not found"));
         }
 
@@ -57,7 +66,8 @@ public class ProfessionalService {
                 CompanyUser companyUser = CompanyUser.builder()
                                 .userId(user.getId())
                                 .companyId(companyId)
-                                .role(UserRole.PROFESSIONAL)
+                                .role(roleRepository.findByName("PROFESSIONAL")
+                                                .orElseThrow(() -> new RuntimeException("Role PROFESSIONAL not found")))
                                 .build();
                 companyUserRepository.save(companyUser);
 
@@ -67,6 +77,17 @@ public class ProfessionalService {
                                 .companyId(companyId)
                                 .active(true)
                                 .build();
+                return professionalRepository.save(professional);
+        }
+
+        @Transactional
+        public Professional updateWorkingHoursByEmail(String email, UUID companyId, String workingHours) {
+                UserAccount user = userAccountRepository.findByEmail(email)
+                                .orElseThrow(() -> new RuntimeException("User not found"));
+                Professional professional = professionalRepository
+                                .findByUserAccountIdAndCompanyId(user.getId(), companyId)
+                                .orElseThrow(() -> new RuntimeException("Professional not found"));
+                professional.setWorkingHours(workingHours);
                 return professionalRepository.save(professional);
         }
 }

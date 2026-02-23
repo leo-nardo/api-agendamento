@@ -7,24 +7,35 @@ import {
     Users,
     Scissors,
     LogOut,
-    UserCircle
+    UserCircle,
+    User,
+    Settings as SettingsIcon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 export default function AppLayout() {
-    const { logout, companyName } = useAuth();
+    const { user, logout, companyName } = useAuth();
     const { t } = useTranslation();
     const location = useLocation();
     const navigate = useNavigate();
 
+    const hasPermission = (permission: string) => {
+        return user?.permissions?.includes(permission) || user?.role === 'ADMIN';
+    };
+
+    const isPlatformAdmin = hasPermission('MANAGE_COMPANIES');
+
     const navItems = [
-        { href: '/admin', label: t('dashboard'), icon: LayoutDashboard },
-        { href: '/admin/appointments', label: t('appointments'), icon: Calendar },
-        { href: '/admin/services', label: t('services'), icon: Scissors },
-        { href: '/admin/professionals', label: t('professionals'), icon: UserCircle },
-        { href: '/admin/customers', label: t('customers'), icon: Users },
-    ];
+        { href: '/admin', label: t('dashboard'), icon: LayoutDashboard, show: !isPlatformAdmin },
+        { href: '/admin/platform', label: 'Plataforma SaaS', icon: LayoutDashboard, show: isPlatformAdmin },
+        { href: '/admin/appointments', label: t('appointments'), icon: Calendar, show: !isPlatformAdmin && (hasPermission('MANAGE_ALL_APPOINTMENTS') || hasPermission('VIEW_ALL_APPOINTMENTS') || hasPermission('VIEW_OWN_APPOINTMENTS') || user?.role === 'OWNER') },
+        { href: '/admin/services', label: t('services'), icon: Scissors, show: !isPlatformAdmin && (hasPermission('MANAGE_SERVICES') || user?.role === 'OWNER') },
+        { href: '/admin/professionals', label: t('professionals'), icon: UserCircle, show: !isPlatformAdmin && (hasPermission('MANAGE_PROFESSIONALS') || user?.role === 'OWNER') },
+        { href: '/admin/customers', label: t('customers'), icon: Users, show: !isPlatformAdmin && (hasPermission('MANAGE_CUSTOMERS') || user?.role === 'OWNER') },
+        { href: '/admin/profile', label: 'Meu Perfil', icon: User, show: true },
+        { href: '/admin/settings', label: 'Configurações', icon: SettingsIcon, show: !isPlatformAdmin && (hasPermission('MANAGE_COMPANY_SETTINGS') || user?.role === 'OWNER') },
+    ].filter(item => item.show);
 
     const handleLogout = () => {
         logout();

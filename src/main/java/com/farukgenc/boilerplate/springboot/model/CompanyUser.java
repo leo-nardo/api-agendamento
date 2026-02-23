@@ -24,9 +24,12 @@ public class CompanyUser {
     @Column(name = "company_id")
     private java.util.UUID companyId;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private UserRole role;
+    @Column(name = "role_id", insertable = false, updatable = false)
+    private java.util.UUID roleId;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_id", nullable = false)
+    private Role role;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

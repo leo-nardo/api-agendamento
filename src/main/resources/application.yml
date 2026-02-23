@@ -4,7 +4,7 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://${POSTGRES_DB_SERVER_ADDRESS:localhost}:${POSTGRES_DB_SERVER_PORT:5432}/
+    url: jdbc:postgresql://${POSTGRES_DB_SERVER_ADDRESS:localhost}:${POSTGRES_DB_SERVER_PORT:5432}/${POSTGRES_DB:agendamento}
     username: ${POSTGRES_USER:postgres}
     password: ${POSTGRES_PASSWORD:example}
     hikari:
@@ -14,6 +14,7 @@ spring:
       ddl-auto: validate
     open-in-view: false
   liquibase:
+    enabled: true
     change-log: classpath:db/changelog/db.changelog-master.yaml
   jta:
     enabled: false
@@ -57,3 +58,8 @@ swagger:
   app-version: 4.0.2
   app-license-url: https://www.apache.org/licenses/LICENSE-2.0.html
   app-license: Apache 2.0
+
+admin:
+  email: ${ADMIN_EMAIL:admin@agendamento.com}
+  password: ${ADMIN_PASSWORD:admin}
+  name: ${ADMIN_NAME:Admin}

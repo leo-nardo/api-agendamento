@@ -33,6 +33,10 @@ public class UserAccount {
     @Builder.Default
     private boolean active = true;
 
+    @Column(name = "is_admin", nullable = false)
+    @Builder.Default
+    private boolean isAdmin = false;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 

@@ -14,8 +14,11 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+
 @Configuration
 @RequiredArgsConstructor
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfiguration {
 
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -37,14 +40,16 @@ public class SecurityConfiguration {
 				.csrf(CsrfConfigurer::disable)
 				.cors(CorsConfigurer::disable)
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-				.authorizeHttpRequests(request -> request.requestMatchers(
-																		  "/api/register",
+				.authorizeHttpRequests(request -> request
+                                                       .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
+                                                       .requestMatchers(
 																	      "/api/login",
                                                                           "/api/public/**",
 																	      "/v3/api-docs/**",
 																          "/swagger-ui/**",
 																	      "/swagger-ui.html",
-																	      "/actuator/**")
+																	      "/actuator/**",
+                                                                          "/error")
 													   .permitAll()
 													   .anyRequest()
 													   .authenticated())

@@ -3,6 +3,8 @@ package com.farukgenc.boilerplate.springboot.model;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Getter
 @Setter
@@ -24,4 +26,8 @@ public class Professional extends BaseTenantEntity {
 
     @Builder.Default
     private boolean active = true;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "working_hours", columnDefinition = "jsonb")
+    private String workingHours;
 }

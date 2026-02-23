@@ -5,12 +5,14 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.farukgenc.boilerplate.springboot.model.UserAccount;
-import com.farukgenc.boilerplate.springboot.model.UserRole;
+import com.farukgenc.boilerplate.springboot.model.Role;
+import com.farukgenc.boilerplate.springboot.model.Permission;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -18,7 +20,7 @@ public class JwtTokenManager {
 
 	private final JwtProperties jwtProperties;
 
-	public String generateToken(UserAccount userAccount, java.util.UUID companyId, UserRole userRole) {
+	public String generateToken(UserAccount userAccount, java.util.UUID companyId, Role role) {
 
 		final String username = userAccount.getEmail();
 
@@ -26,7 +28,10 @@ public class JwtTokenManager {
 		return JWT.create()
 				.withSubject(username)
 				.withIssuer(jwtProperties.getIssuer())
-				.withClaim("role", userRole.name())
+				.withClaim("role", role != null ? role.getName() : null)
+				.withClaim("permissions", role != null && role.getPermissions() != null 
+                        ? role.getPermissions().stream().map(Permission::getName).collect(Collectors.toList()) 
+                        : null)
                 .withClaim("companyId", Objects.nonNull(companyId) ? companyId.toString() : null)
 				.withIssuedAt(new Date())
 				.withExpiresAt(new Date(System.currentTimeMillis() + jwtProperties.getExpirationMinute() * 60 * 1000))

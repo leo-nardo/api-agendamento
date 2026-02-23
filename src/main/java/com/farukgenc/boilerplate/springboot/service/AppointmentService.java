@@ -25,8 +25,23 @@ public class AppointmentService {
     private final BusinessServiceRepository businessServiceRepository;
     private final CustomerRepository customerRepository;
 
-    public List<Appointment> findAll() {
-        return appointmentRepository.findAll();
+    private final com.farukgenc.boilerplate.springboot.repository.UserAccountRepository userAccountRepository;
+    private final com.farukgenc.boilerplate.springboot.repository.CompanyUserRepository companyUserRepository;
+
+    public List<Appointment> findAllForUser(UUID companyId, String email) {
+        com.farukgenc.boilerplate.springboot.model.UserAccount user = userAccountRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        com.farukgenc.boilerplate.springboot.model.CompanyUser companyUser = companyUserRepository
+                .findByUserIdAndCompanyId(user.getId(), companyId)
+                .orElseThrow(() -> new RuntimeException("User not in company"));
+
+        if ("PROFESSIONAL".equals(companyUser.getRole().getName())) {
+            Professional prof = professionalRepository.findByUserAccountIdAndCompanyId(user.getId(), companyId)
+                    .orElseThrow(() -> new RuntimeException("Professional profile not found"));
+            return appointmentRepository.findByCompanyIdAndProfessionalId(companyId, prof.getId());
+        }
+
+        return appointmentRepository.findByCompanyId(companyId);
     }
 
     @Transactional
@@ -41,32 +56,37 @@ public class AppointmentService {
             throw new RuntimeException("Professional does not belong to this company");
         }
 
-        // 2. Validate Service
-        BusinessService service = businessServiceRepository.findById(businessServiceId)
-                .orElseThrow(() -> new RuntimeException("Service not found"));
-
-        if (!service.getCompanyId().equals(companyId)) {
-            throw new RuntimeException("Service does not belong to this company");
-        }
-
-        // 3. Check Availability
-        if (!availabilityService.isAvailable(professionalId, startTime, endTime)) {
-            throw new RuntimeException("Professional is not available for the selected time.");
-        }
-
         Appointment.AppointmentBuilder<?, ?> builder = Appointment.builder()
                 .companyId(companyId)
                 .professional(professional)
-                .service(service)
                 .startTime(startTime)
-                .endTime(endTime)
-                .status(AppointmentStatus.SCHEDULED);
+                .endTime(endTime);
 
-        // 4. Handle Optional Customer
-        if (customerId != null) {
-            var customer = customerRepository.findById(customerId)
-                    .orElseThrow(() -> new RuntimeException("Customer not found"));
-            builder.customer(customer);
+        if (businessServiceId != null) {
+            // Normal Appointment
+            BusinessService service = businessServiceRepository.findById(businessServiceId)
+                    .orElseThrow(() -> new RuntimeException("Service not found"));
+
+            if (!service.getCompanyId().equals(companyId)) {
+                throw new RuntimeException("Service does not belong to this company");
+            }
+
+            // 3. Check Availability
+            if (!availabilityService.isAvailable(professionalId, startTime, endTime)) {
+                throw new RuntimeException("Professional is not available for the selected time.");
+            }
+
+            builder.service(service).status(AppointmentStatus.SCHEDULED);
+
+            // 4. Handle Optional Customer
+            if (customerId != null) {
+                var customer = customerRepository.findById(customerId)
+                        .orElseThrow(() -> new RuntimeException("Customer not found"));
+                builder.customer(customer);
+            }
+        } else {
+            // Blocked Time Window
+            builder.status(AppointmentStatus.BLOCKED);
         }
 
         Appointment appointment = builder.build();

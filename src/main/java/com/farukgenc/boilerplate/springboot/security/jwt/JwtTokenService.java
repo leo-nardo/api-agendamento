@@ -2,9 +2,10 @@ package com.farukgenc.boilerplate.springboot.security.jwt;
 
 import com.farukgenc.boilerplate.springboot.model.CompanyUser;
 import com.farukgenc.boilerplate.springboot.model.UserAccount;
-import com.farukgenc.boilerplate.springboot.model.UserRole;
+import com.farukgenc.boilerplate.springboot.model.Role;
 import com.farukgenc.boilerplate.springboot.repository.CompanyUserRepository;
 import com.farukgenc.boilerplate.springboot.repository.UserAccountRepository;
+import com.farukgenc.boilerplate.springboot.repository.RoleRepository;
 import com.farukgenc.boilerplate.springboot.security.dto.LoginRequest;
 import com.farukgenc.boilerplate.springboot.security.dto.LoginResponse;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ public class JwtTokenService {
 	private final UserAccountRepository userAccountRepository;
 	private final CompanyUserRepository companyUserRepository;
 	private final com.farukgenc.boilerplate.springboot.repository.CompanyRepository companyRepository;
+	private final RoleRepository roleRepository;
 	private final JwtTokenManager jwtTokenManager;
 	private final AuthenticationManager authenticationManager;
 
@@ -42,7 +44,8 @@ public class JwtTokenService {
 																									// auth success
 
 		java.util.UUID companyId = loginRequest.getCompanyId();
-		UserRole role = UserRole.PROFESSIONAL; // Default fallback if no company context, or handle differently
+		Role role = roleRepository.findByName("PROFESSIONAL").orElse(null); // Default fallback if no company context,
+																			// or handle differently
 
 		String slug = null;
 		String companyName = null;
@@ -72,8 +75,12 @@ public class JwtTokenService {
 				}
 			} else {
 				// User has no companies. Maybe a platform admin or just registered?
-				companyId = null;
-				role = UserRole.ADMIN; // Placeholder or specific NO_ACCESS role
+				if (userAccount.isAdmin()) {
+					companyId = null;
+					role = roleRepository.findByName("ADMIN").orElse(null);
+				} else {
+					throw new RuntimeException("User has no companies and is not an Admin");
+				}
 			}
 		}
 
@@ -81,6 +88,6 @@ public class JwtTokenService {
 
 		log.info("{} has successfully logged in!", userAccount.getEmail());
 
-		return new LoginResponse(token, companyId, role.name(), slug, companyName);
+		return new LoginResponse(token, companyId, role != null ? role.getName() : null, slug, companyName);
 	}
 }

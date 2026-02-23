@@ -19,7 +19,7 @@ interface Service {
 
 interface Professional {
     id: string;
-    name: string;
+    fullName: string;
 }
 
 interface GuestBookingWizardProps {
@@ -137,7 +137,7 @@ export default function GuestBookingWizard({ companyId }: GuestBookingWizardProp
                                 className={`p-4 border rounded cursor-pointer hover:bg-gray-50 flex items-center justify-center text-center ${selectedProfessional?.id === prof.id ? 'border-primary ring-2 ring-primary bg-blue-50' : 'bg-white'}`}
                                 onClick={() => setSelectedProfessional(prof)}
                             >
-                                <span className="font-semibold text-lg">{prof.name}</span>
+                                <span className="font-semibold text-lg">{prof.fullName}</span>
                             </div>
                         ))}
                     </div>
@@ -218,7 +218,7 @@ export default function GuestBookingWizard({ companyId }: GuestBookingWizardProp
                             </p>
                             <p className="flex justify-between">
                                 <span className="font-medium text-gray-600">Profissional:</span>
-                                <span className="font-semibold">{selectedProfessional?.name}</span>
+                                <span className="font-semibold">{selectedProfessional?.fullName}</span>
                             </p>
                             <p className="flex justify-between">
                                 <span className="font-medium text-gray-600">Data e Hora:</span>

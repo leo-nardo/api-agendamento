@@ -18,7 +18,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 @Slf4j
 @Service
@@ -79,8 +82,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			log.warn("Could not extract companyId from token: {}", e.getMessage());
 		}
 
+		List<SimpleGrantedAuthority> authorities = new java.util.ArrayList<>();
+		try {
+			List<String> perms = com.auth0.jwt.JWT.decode(authToken).getClaim("permissions").asList(String.class);
+			if (perms != null) {
+				authorities = perms.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
+			}
+
+			// Also grab the role and prefix it if necessary, though permissions usually
+			// suffice
+			String roleClaim = com.auth0.jwt.JWT.decode(authToken).getClaim("role").asString();
+			if (roleClaim != null) {
+				authorities.add(new SimpleGrantedAuthority("ROLE_" + roleClaim));
+			}
+		} catch (Exception e) {
+			log.warn("Could not extract permissions from token: {}", e.getMessage());
+		}
+
 		final UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user, null,
-				user.getAuthorities());
+				authorities.isEmpty() ? user.getAuthorities() : authorities);
 		authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 		securityContext.setAuthentication(authentication);
 

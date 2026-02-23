@@ -1,20 +1,22 @@
 package com.farukgenc.boilerplate.springboot.controller;
 
-import com.farukgenc.boilerplate.springboot.model.BusinessService;
-import com.farukgenc.boilerplate.springboot.model.Company;
-import com.farukgenc.boilerplate.springboot.model.Professional;
+import com.farukgenc.boilerplate.springboot.payload.response.BusinessServiceResponse;
+import com.farukgenc.boilerplate.springboot.payload.response.CompanyResponse;
+import com.farukgenc.boilerplate.springboot.payload.response.ProfessionalResponse;
 import com.farukgenc.boilerplate.springboot.repository.CompanyRepository;
 import com.farukgenc.boilerplate.springboot.service.BusinessServiceService;
 import com.farukgenc.boilerplate.springboot.service.ProfessionalService;
 import com.farukgenc.boilerplate.springboot.service.AppointmentService;
 import com.farukgenc.boilerplate.springboot.service.AvailabilityService;
 import com.farukgenc.boilerplate.springboot.service.CustomerService;
+import com.farukgenc.boilerplate.springboot.utils.DtoMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/public")
@@ -27,26 +29,31 @@ public class PublicController {
     private final AppointmentService appointmentService;
     private final AvailabilityService availabilityService;
     private final CustomerService customerService;
+    private final DtoMapper dtoMapper;
 
     @GetMapping("/company/{slug}")
-    public ResponseEntity<Company> getCompanyBySlug(@PathVariable String slug) {
+    public ResponseEntity<CompanyResponse> getCompanyBySlug(@PathVariable String slug) {
         return companyRepository.findBySlug(slug)
-                .map(company -> ResponseEntity.ok(company))
+                .map(company -> ResponseEntity.ok(dtoMapper.toCompanyResponse(company)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/{companyId}/services")
-    public ResponseEntity<List<BusinessService>> getServices(@PathVariable java.util.UUID companyId) {
-        // Since we don't have a findByCompanyId, we might need to add it, or
-        // temporarily filter manually.
-        // It's better to add findByCompanyId in BusinessServiceService later.
-        // For now, let's call a method we will create: findAllByCompanyId
-        return ResponseEntity.ok(businessServiceService.findAllByCompanyId(companyId));
+    public ResponseEntity<List<BusinessServiceResponse>> getServices(@PathVariable java.util.UUID companyId) {
+        List<BusinessServiceResponse> responses = businessServiceService.findAllByCompanyId(companyId)
+                .stream()
+                .map(dtoMapper::toBusinessServiceResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/{companyId}/professionals")
-    public ResponseEntity<List<Professional>> getProfessionals(@PathVariable java.util.UUID companyId) {
-        return ResponseEntity.ok(professionalService.findAllByCompanyId(companyId));
+    public ResponseEntity<List<ProfessionalResponse>> getProfessionals(@PathVariable java.util.UUID companyId) {
+        List<ProfessionalResponse> responses = professionalService.findAllByCompanyId(companyId)
+                .stream()
+                .map(dtoMapper::toProfessionalResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/{companyId}/availability/slots")

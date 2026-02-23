@@ -5,3 +5,6 @@ databaseChangeLog:
   - include:
       file: changes/V2__add_company_slug.sql
       relativeToChangelogFile: true
+  - include:
+      file: changes/V3__add_working_hours_to_professional.sql
+      relativeToChangelogFile: true

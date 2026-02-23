@@ -4,11 +4,12 @@ import com.farukgenc.boilerplate.springboot.model.Company;
 import com.farukgenc.boilerplate.springboot.model.CompanyUser;
 import com.farukgenc.boilerplate.springboot.model.Professional;
 import com.farukgenc.boilerplate.springboot.model.UserAccount;
-import com.farukgenc.boilerplate.springboot.model.UserRole;
+import com.farukgenc.boilerplate.springboot.model.Role;
 import com.farukgenc.boilerplate.springboot.repository.CompanyRepository;
 import com.farukgenc.boilerplate.springboot.repository.CompanyUserRepository;
 import com.farukgenc.boilerplate.springboot.repository.ProfessionalRepository;
 import com.farukgenc.boilerplate.springboot.repository.UserAccountRepository;
+import com.farukgenc.boilerplate.springboot.repository.RoleRepository;
 import com.farukgenc.boilerplate.springboot.security.dto.RegistrationRequest;
 import com.farukgenc.boilerplate.springboot.security.dto.RegistrationResponse;
 import com.farukgenc.boilerplate.springboot.service.UserValidationService;
@@ -30,6 +31,7 @@ public class UserServiceImpl implements UserService {
 	private final CompanyRepository companyRepository;
 	private final CompanyUserRepository companyUserRepository;
 	private final ProfessionalRepository professionalRepository;
+	private final RoleRepository roleRepository;
 
 	private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
@@ -74,7 +76,8 @@ public class UserServiceImpl implements UserService {
 		CompanyUser companyUser = CompanyUser.builder()
 				.companyId(company.getId())
 				.userId(user.getId())
-				.role(UserRole.OWNER)
+				.role(roleRepository.findByName("OWNER")
+						.orElseThrow(() -> new RuntimeException("Role OWNER not found")))
 				.build();
 
 		companyUserRepository.save(companyUser);

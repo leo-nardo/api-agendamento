@@ -11,6 +11,9 @@ import Professionals from '@/pages/Professionals';
 import Customers from '@/pages/Customers';
 import MyAppointments from '@/pages/MyAppointments';
 import NewAppointment from '@/pages/NewAppointment';
+import PlatformAdminDashboard from '@/pages/PlatformAdminDashboard';
+import ProfessionalProfile from '@/pages/ProfessionalProfile';
+import Settings from '@/pages/Settings';
 import Storefront from '@/pages/public/Storefront';
 
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
@@ -36,8 +39,11 @@ function App() {
                         <Route path="services" element={<Services />} />
                         <Route path="professionals" element={<Professionals />} />
                         <Route path="customers" element={<Customers />} />
+                        <Route path="profile" element={<ProfessionalProfile />} />
+                        <Route path="settings" element={<Settings />} />
                         <Route path="appointments" element={<MyAppointments />} />
                         <Route path="appointments/new" element={<NewAppointment />} />
+                        <Route path="platform" element={<PlatformAdminDashboard />} />
                     </Route>
 
                     {/* Public Storefront Routes */}

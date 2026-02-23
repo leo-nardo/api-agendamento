@@ -7,6 +7,7 @@ interface User {
     companyId?: string;
     slug?: string;
     companyName?: string;
+    permissions?: string[];
     exp?: number;
     iat?: number;
 }
@@ -17,7 +18,7 @@ interface AuthContextType {
     companyId: string | null;
     slug: string | null;
     companyName: string | null;
-    login: (token: string, companyId: string, slug?: string, companyName?: string) => void;
+    login: (token: string, companyId: string | null, slug?: string, companyName?: string) => void;
     logout: () => void;
     isAuthenticated: boolean;
 }
@@ -48,14 +49,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     }, [token, slug, companyName]);
 
-    const login = (newToken: string, newCompanyId: string, newSlug?: string, newCompanyName?: string) => {
+    const login = (newToken: string, newCompanyId: string | null, newSlug?: string, newCompanyName?: string) => {
         localStorage.setItem('token', newToken);
-        localStorage.setItem('companyId', newCompanyId);
+        if (newCompanyId) {
+            localStorage.setItem('companyId', newCompanyId);
+        } else {
+            localStorage.removeItem('companyId');
+        }
         if (newSlug) localStorage.setItem('slug', newSlug);
         if (newCompanyName) localStorage.setItem('companyName', newCompanyName);
 
         setToken(newToken);
-        setCompanyId(newCompanyId);
+        setCompanyId(newCompanyId || null);
         setSlug(newSlug || null);
         setCompanyName(newCompanyName || null);
 
